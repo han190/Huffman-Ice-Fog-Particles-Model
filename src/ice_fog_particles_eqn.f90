@@ -19,14 +19,13 @@ module ice_fog_particles_eqn_m
         real(real_t) :: L_v, L_s ! the heats of vaporization and sublimation
     contains
         procedure :: abs_temp => abs_temp_func
+        procedure :: derivs => derivs_sub
     end type ice_fog_particles_eqn_t
 
     real(real_t), parameter :: pi = 3.1415926535897932384626_real_t
     real(real_t), parameter :: T_m = 273._real_t ! K, the melting temperature
-    real(real_t), parameter :: A = 6.5e-4_real_t ! cm-3 sec-1, [Bigg, 1953]
+    real(real_t), parameter :: constA = 6.5e-4_real_t ! cm-3 sec-1, [Bigg, 1953]
     real(real_t), parameter :: eta = 1._real_t ! Avagrado's number 
-    real(real_t), parameter :: 
-
 
 contains
 
@@ -92,7 +91,7 @@ contains
         T_s = T_m - abs_temp_func(this, t)
         associate(this%e_w => e_w, this%e_i => e_i)
             e_s = e_w + (e_i - e_w) * &
-                ( 1._real_t - exp(-A * r**3 * t * (exp(T_s) - 1._real_t)) )
+                ( 1._real_t - exp(-constA * r**3 * t * (exp(T_s) - 1._real_t)) )
         end associate
     end function e_s_func
 
@@ -104,7 +103,7 @@ contains
         T_s = T_m - abs_temp_func(this, t)
         associate(this%L_v => L_v, this%L_s => L_s)
             L = L_v + (L_s - L_v) * &
-                ( 1._real_t - exp(-A * r**3 * t * (exp(T_s) - 1._real_t)) )
+                ( 1._real_t - exp(-constA * r**3 * t * (exp(T_s) - 1._real_t)) )
         end associate
     end function L_func
 
@@ -117,7 +116,7 @@ contains
 
     function sum_dmdt_func(this, S, r, t) result(dmdt)
         class(ice_fog_particles_eqn_t), intent(in) :: this
-        real(real_t), intent(in) :: S, t 
+        real(real_t), intent(in) :: S, r, t
         real(real_t) :: dmdt 
         real(real_t) :: u, v 
         real(real_t) :: temp
@@ -139,13 +138,15 @@ contains
         real(real_t), intent(in) :: t ! time
         real(real_t), dimension(:), intent(in) :: S ! the saturation ratio
         real(real_t), dimension(:), intent(out) :: dSdt
-        real(real_t) :: temp, dTdt, e_s
+        real(real_t) :: temp, dTdt, e_s, dmdt
 
         dTdt = dTdt_func(this, t)
+        temp = abs_temp_func(this, t)
         e_s = e_s_func(this, t)
+        dmdt = sum_dmdt_func(this, s, r, t)
         associate( this%L => L, this%M => M, this%R => R, )
-        dSdt(1) = 
-
+            dSdt(1) = - L*M*S / (R*temp**2) * dTdt - R*temp / (e_s*M)*dmdt
+        end associate
     end subroutine derivs_sub
 
 end module ice_fog_particles_eqn_m
