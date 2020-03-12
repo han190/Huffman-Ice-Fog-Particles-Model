@@ -39,7 +39,8 @@ contains
         real(real_t), intent(in) :: e_i, e_w, L_v, L_s
 
         this%v_0 = v_0
-        this%a, b = a, b
+        this%a = a
+        this%b = b
         this%T_i = T_i
         this%T_0 = T_0
         this%E = E
@@ -144,7 +145,7 @@ contains
         temp = abs_temp_func(this, t)
         e_s = e_s_func(this, t)
         dmdt = sum_dmdt_func(this, s, r, t)
-        associate( this%L => L, this%M => M, this%R => R, )
+        associate( this%L => L, this%M => M, this%R => R )
             dSdt(1) = - L*M*S / (R*temp**2) * dTdt - R*temp / (e_s*M)*dmdt
         end associate
     end subroutine derivs_sub
