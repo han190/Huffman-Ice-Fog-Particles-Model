@@ -1,23 +1,13 @@
-! The modified adaptive stepsize runge kutta method
-! The typical ASRK solves the problem
-!               dy_i/dx_i = f(x_i, y_i)
-!               y_(i+1) = y_i + dy_i/dx_i
-! Now the problem to bo solved has the following structure
-!               dy_i/dx_i = f(x_i, y_i, yarr)
-!       where,  yarr = [y_1, y_2, y_3, ..., y_(i-1)]
-!               y_(i+1) = y_i + dy_i/dx_i
-!-------------------------------------------------------------------------------
-
 module runge_kutta_m
     use real_m 
     implicit none 
     private
 
     integer, parameter :: nmax = 10000
+    real(real_t) :: yarr_global(4, nmax) ! [h, x, y, dydx]
 
     type, abstract, public :: runge_kutta_t 
-        real(real_t) :: eps 
-        real(real_t), pointer :: yscal(:)
+        real(real_t) :: eps, yscal
     contains 
         procedure :: rk_init => initialize_sub 
         procedure :: rkck => rkck_sub 
@@ -26,7 +16,6 @@ module runge_kutta_m
     end type
 
     abstract interface
-
         subroutine derivsx(this, idx, x, y, yarr, dydx)
             use real_m
             import :: runge_kutta_t
@@ -34,23 +23,20 @@ module runge_kutta_m
 
             class(runge_kutta_t) :: this
             integer, intent(in) :: idx ! index
-            real(real_t), intent(in) :: x
-            real(real_t), intent(in) :: y(:)
+            real(real_t), intent(in) :: x, y
             real(real_t), intent(inout) :: yarr(:,:)
-            real(real_t), intent(out) :: dydx(:)
+            real(real_t), intent(out) :: dydx
         end subroutine derivsx
-
     end interface
 
 contains 
 
     subroutine initialize_sub(this, eps, yscal)
         class(runge_kutta_t) :: this 
-        real(real_t), intent(in) :: eps 
-        real(real_t), target, intent(in) :: yscal(:)
+        real(real_t), intent(in) :: eps, yscal
 
-        this%eps = eps 
-        this%yscal => yscal 
+        this%eps   = eps 
+        this%yscal = yscal 
     end subroutine initialize_sub 
 
     subroutine rkck_sub(this, idx, y, yarr, dydx, x, h, yout, yerr)
@@ -59,13 +45,11 @@ contains
 
         class(runge_kutta_t) :: this
         integer, intent(in) :: idx
-        real(real_t), intent(in) :: y(:), dydx(:), x, h
+        real(real_t), intent(in) :: x, y, dydx, h
         real(real_t), intent(inout) :: yarr(:,:)
-        real(real_t), intent(out) :: yout(:), yerr(:)
-        real(real_t), dimension(size(y)) :: ak2, ak3, ak4, ak5, ak6, ytemp
-        integer :: ndum
-               
-        ndum = size(y, dim = 1)
+        real(real_t), intent(out) :: yout, yerr
+        real(real_t) :: ak2, ak3, ak4, ak5, ak6, ytemp
+
         ytemp = y + b21 * h * dydx
         call this%derivs(idx, x + a2 * h, ytemp, yarr, ak2)
         ytemp = y + h * (b31*dydx + b32*ak2)
@@ -81,44 +65,29 @@ contains
 
         call this%derivs(idx, x + a6 * h, ytemp, yarr, ak6)
         yout = y + h * (c1*dydx + c3*ak3 + c4*ak4 + c6*ak6)
-
         yerr = h * (dc1*dydx + dc3*ak3 + dc4*ak4 + dc5*ak5 + dc6*ak6)
     end subroutine rkck_sub
 
     subroutine rkqs_sub(this, idx, y, yarr, dydx, x, htry, hdid, hnext)
         class(runge_kutta_t) :: this
         integer, intent(in) :: idx
-        real(real_t), intent(inout) :: y(:), yarr(:,:)
-        real(real_t), intent(in) :: dydx(:)
-        real(real_t), intent(inout) :: x
-        real(real_t), intent(in) :: htry
+        real(real_t), intent(inout) :: x, y, yarr(:,:)
+        real(real_t), intent(in) :: dydx, htry 
         real(real_t), intent(out) :: hdid, hnext
-        integer :: ndum
-        real(real_t) :: errmax, h, htemp, xnew
-        real(real_t), dimension(size(y)) :: yerr, ytemp
+        real(real_t) :: errmax, h, htemp, xnew, yerr, ytemp
         real(real_t), parameter :: safety = 0.9_real_t, pgrow = -0.2_real_t 
         real(real_t), parameter :: pshrnk = -0.25_real_t
         real(real_t), parameter :: errcon = 1.89e-4_real_t
         real(real_t), parameter :: tiny_real_t = 1.e-30_real_t
-        
-        if ( .not. associated(this%yscal) ) then
-            error stop ' yscal has not been associated.'
-        end if 
-
-        if ( size(this%yscal, dim=1) == size(y, dim=1) ) then 
-            ndum = size(y, dim=1)
-        else 
-            error stop 'yscal and y have different dimensions'
-        end if 
 
         h = htry
         do
             call rkck_sub(this, idx, y, yarr, dydx, x, h, ytemp, yerr)
-            errmax = maxval( abs( yerr(:) / this%yscal(:) ) ) / this%eps
+            errmax = abs(yerr/this%yscal) / this%eps
             if (errmax <= 1.0_real_t) exit
 
             htemp = safety * h * errmax**pshrnk
-            h = sign( max( abs(htemp), 0.1_real_t * abs(h) ), h )
+            h = sign( max(abs(htemp), 0.1_real_t*abs(h)), h )
             xnew = x + h
 
             if ( abs(xnew - x) < tiny_real_t ) then
@@ -132,23 +101,25 @@ contains
             hnext = 5.0_real_t * h
         end if
 
-        hdid = h; x = x + h; y(:) = ytemp(:)
+        hdid = h; x = x + h; y = ytemp
     end subroutine rkqs_sub
 
-    subroutine rkm_sub(this, idx, y, y_arr, dydx, x, htry, hdid, hnext)
+    subroutine rkm_sub(this, idx, y, yarr, dydx, x, htry, hdid, hnext)
         class(runge_kutta_t) :: this
-        integer, intent(in) :: idx
-        real(real_t), intent(inout) :: y(:), yarr(:,:)
-        real(real_t), intent(in) :: dydx(:)
-        real(real_t), intent(inout) :: x
-        real(real_t), intent(in) :: htry
+        integer, intent(inout) :: idx
+        real(real_t), intent(inout) :: x, y, yarr(:,:)
+        real(real_t), intent(in) :: htry, dydx
         real(real_t), intent(out) :: hdid, hnext
 
         if (idx < 1) then 
             error stop "Index has to be equal or greater than one."
+        else if (idx > 9999) then 
+            error stop "Index greater than the max value possible."
         end if 
 
-        
-
+        yarr(1:4, 1:idx - 1) = yarr_global(1:4, 1:idx - 1)
+        call rkqs_sub(this, idx, y, yarr, dydx, x, htry, hdid, hnext)
+        yarr_global(1:4, idx) = [hnext, x, y, dydx]
+    end subroutine rkm_sub
    
 end module runge_kutta_m
