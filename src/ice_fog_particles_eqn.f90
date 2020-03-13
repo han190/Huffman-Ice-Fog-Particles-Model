@@ -1,14 +1,15 @@
 module ice_fog_particles_eqn_m
     use real_m
+    use runge_kutta_m
     implicit none 
     private 
 
-    type, public :: ice_fog_particles_eqn_t
+    type, extends(runge_kutta_t), public :: ice_fog_particles_eqn_t
         real(real_t) :: v_0 ! initial velocity
         real(real_t) :: a, b ! coefficients required to compute temp_abs
         real(real_t) :: T_i ! initial temperature
         real(real_t) :: T_0 ! environment temperature
-        real(real_t) :: E ! the decrease in water vapor density, usually 0
+        !real(real_t) :: E ! the decrease in water vapor density, usually 0
         real(real_t) :: M ! the molecular weight of water
         real(real_t) :: K ! the thermal conductivity of air 
         real(real_t) :: D ! the diffusivity of water vapor in air
@@ -16,29 +17,33 @@ module ice_fog_particles_eqn_m
         real(real_t) :: f ! kinetics of vapor molecules and particle surface
         real(real_t) :: e_i, e_w ! the saturation vapor pressure(ice and water)
         real(real_t) :: L_v, L_s ! the heats of vaporization and sublimation
-        real(real_t) :: eta 
     contains
-        procedure :: temperature => temp_func
+        procedure :: eqn_init => eqn_init_sub
+        procedure :: temp => temp_func
+        procedure :: dr => drdt_func
+        procedure :: derivs => derivs_sub
     end type ice_fog_particles_eqn_t
 
-    real(real_t), parameter :: pi = 3.1415926535897932384626_real_t
-    real(real_t), parameter :: T_m = 273._real_t ! K, the melting temperature
-    real(real_t), parameter :: constA = 6.5e-4_real_t ! cm-3 sec-1, [Bigg, 1953]
-    real(real_t), parameter :: eta = 1._real_t ! Avagrado's number 
+    real(real_t), public, parameter :: pi = 3.1415926535897932384626_real_t
+    real(real_t), public, parameter :: T_m = 273._real_t
+    ! K, the melting temperature
+    real(real_t), public, parameter :: constA = 6.5e-4_real_t
+    ! cm-3 sec-1, [Bigg, 1953]
+    real(real_t), public, parameter :: eta = 1._real_t
+    ! Avagrado's number
 
 contains
 
-    subroutine init_sub( &
-        this, v_0, a, b, T_i, T_0, E, M, K, D, R, f, e_i, e_w, L_v, L_s &
+    subroutine eqn_init_sub( &
+        this, v_0, a, b, T_i, T_0, M, K, D, R, f, e_i, e_w, L_v, L_s &
     )
         class(ice_fog_particles_eqn_t) :: this
-        real(real_t), intent(in) :: v_0, a, b, T_i, T_0, E, M, K, D, R, f
+        real(real_t), intent(in) :: v_0, a, b, T_i, T_0, M, K, D, R, f
         real(real_t), intent(in) :: e_i, e_w, L_v, L_s
 
         this%v_0 = v_0
         this%a   = a;   this%b   = b
         this%T_i = T_i; this%T_0 = T_0
-        this%E   = E
 
         this%M   = M;   this%K   = K
         this%D   = D;   this%R   = R
@@ -46,23 +51,33 @@ contains
 
         this%e_i = e_i; this%e_w = e_w
         this%L_v = L_v; this%L_s = L_s 
-    end subroutine init_sub
+    end subroutine eqn_init_sub
 
     function temp_func(this, t) result(temp)
         class(ice_fog_particles_eqn_t) :: this
         real(real_t), intent(in) :: t ! time
-        real(real_t) :: temp, deltaT
+        real(real_t) :: temp, deltaT, c
 
-        associate( &
-            this%a => a, this%b => b, this%v_0/this%b => c, &
-            this%T_i = T_i, this%T_0 = T_0 &     
-        )
-            
+        associate(a => this%a, b => this%b, T_i => this%T_i, T_0 => this%T_0)
+            c = this%v_0/this%b
             deltaT = T_i - T_0
             temp = T_0 + deltaT / &
                 (a*b*deltaT*log(c*t + 1._real_t) + 1._real_t)
         end associate
     end function temp_func
+
+    function dtemp_func(this, t) result(dTdt)
+        class(ice_fog_particles_eqn_t) :: this
+        real(real_t), intent(in) :: t
+        real(real_t) :: dTdt, deltaT, c
+
+        associate(a => this%a, b => this%b, T_i => this%T_i, T_0 => this%T_0)
+            c = this%v_0/this%b
+            deltaT = T_i - T_0
+            dTdt = - a*b*c*deltaT**2 / (1._real_t + c*t) / &
+                (1._real_t + a*b*deltaT*log(1._real_t+c*t))**2
+        end associate
+    end function dtemp_func
 
     function e_s_func(this, r, t) result(e_s)
         class(ice_fog_particles_eqn_t) :: this 
@@ -70,7 +85,7 @@ contains
         real(real_t) :: e_s, T_s, expt, temp
 
         temp = temp_func(this, t)
-        associate(this%e_w => e_w, this%e_i => e_i)
+        associate(e_w => this%e_w, e_i => this%e_i)
             T_s  = T_m - temp
             expt = exp( - constA*r**3*t*(exp(T_s) - 1._real_t) )
             e_s  = e_w + (e_i - e_w) * ( 1._real_t - expt )
@@ -83,7 +98,7 @@ contains
         real(real_t) :: lh, T_s, expt, temp
 
         temp = temp_func(this, t)
-        associate(this%L_s => L_s, this%L_v => L_v)
+        associate(L_s => this%L_s, L_v => this%L_v)
             T_s  = T_m - temp
             expt = exp( - constA*r**3*t*(exp(T_s) - 1._real_t) )
             lh   = L_s + (L_s - L_v) * ( 1._real_t - expt )
@@ -101,7 +116,7 @@ contains
         lh   = L_func(this, r, t)
 
         u = lh**2 * this%M / (this%K * this%R * temp**2)
-        v = this%R * this%T / (e_s * this%D * this%M)
+        v = this%R * temp / (e_s * this%D * this%M)
     end subroutine UVcoeff_sub
 
     function sigma_func(this, t) result(sigma)
@@ -140,7 +155,7 @@ contains
         temp  = temp_func(this, t)
         e_s   = e_s_func(this, r, t)
 
-        associate( this%eta => eta, this%R => R, this%M => M )
+        associate(R => this%R, M => this%M)
             term1 = e_s**2 * S**2 / (R**2 * temp**2)
             term2 = sqrt(2._real_t * eta**3 * M * sigma / pi)
             expt  = exp( - 16._real_t * pi * eta * M**2 * sigma**3 / &
@@ -149,20 +164,56 @@ contains
         end associate
     end function I_func
 
-    subroutine integral_t(this, S, r, t, int_t)
+    subroutine integral_term_sub(this, S, r, t, ret)
         class(ice_fog_particles_eqn_t) :: this 
         real(real_t), intent(in) :: S, r, t 
-        real(real_t), intent(out) :: int_t 
+        real(real_t), intent(out) :: ret
         real(real_t), parameter :: r_0 = 1.e-7_real_t
-        real(real_t) :: r_i, r_ip1, t_i, t_ip1
+        real(real_t) :: Sn, rn, tn, tmp
+        integer :: idx
 
-        r_i = r_0
-        associate(this%f => f)
-            do
-                r_ip1 = drdt(this, S, )
-                
+        rn = r_0
+        tmp = 0._real_t
+        associate(f => this%f)
+            do idx = 1, nmax
+                tn = global_arr(2, idx)
+                if (tn >= t) exit
+                Sn = global_arr(3, idx)
+                rn = global_arr(4, idx)
+
+                tmp = tmp + I_func(this, Sn, rn, tn) * rn**2 / (f + rn)
             end do
         end associate
-    end subroutine integral_t
+
+        ret = tmp
+    end subroutine integral_term_sub
+
+    function sdmdt_func(this, S, r, t) result(sdmdt)
+        class(ice_fog_particles_eqn_t) :: this
+        real(real_t), intent(in) :: S, r, t
+        real(real_t) :: sdmdt, u, v, intt
+
+        call UVcoeff_sub(this, r, t, u, v)
+        call integral_term_sub(this, S, r, t, intt)
+        sdmdt = 4._real_t * pi / (u + v) * (S - 1) * intt
+    end function sdmdt_func
+
+    subroutine derivs_sub(this, t, r, S, dSdt)
+        class(ice_fog_particles_eqn_t) :: this
+        real(real_t), intent(in) :: S, r, t
+        real(real_t), intent(out) :: dSdt
+        real(real_t) :: lh, e_s, sdmdt, temp, dTdt
+
+        lh = L_func(this, r, t)
+        e_s = e_s_func(this, r, t)
+        sdmdt = sdmdt_func(this, S, r, t)
+        temp = temp_func(this, t)
+        dTdt = dtemp_func(this, t)
+
+        associate(M => this%M, R => this%R)
+            dSdt = - S/temp * (1._real_t - lh*M/(R*temp)) * dTdt &
+                - R*temp/(e_s*M) * sdmdt
+        end associate
+    end subroutine derivs_sub
 
 end module ice_fog_particles_eqn_m
