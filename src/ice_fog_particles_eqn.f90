@@ -163,5 +163,6 @@ contains
                 
             end do
         end associate
+    end subroutine integral_t
 
 end module ice_fog_particles_eqn_m
