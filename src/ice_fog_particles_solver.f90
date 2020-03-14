@@ -21,6 +21,7 @@ module ice_fog_particles_solver_m
         type(ice_fog_particles_eqn_t), pointer :: ifp_eqn_p
     contains
         procedure :: init => ifp_solver_init_sub
+        procedure :: slv => solver_sub
     end type ice_fog_particles_solver_t
 
     real(real_t), parameter :: eps = 1.e-14_real_t
@@ -54,9 +55,10 @@ contains
         )
     end subroutine ifp_solver_init_sub
 
-    subroutine solver_sub(this, tspan)
+    subroutine solver_sub(this, tspan, filename)
         class(ice_fog_particles_solver_t) :: this 
         real(real_t), intent(in) :: tspan(2)
+        character(len=*), intent(in) :: filename
         real(real_t) :: t0, tf, r0, h0
         real(real_t) :: tn, rn, Sn, hn, dSdtn
         real(real_t) :: hdid, hnext
@@ -66,6 +68,9 @@ contains
         r0 = 1.e-7_real_t
         h0 = 1.e-14_real_t
         global_arr = 0._real_t
+        ! output_arr = 0._real_t
+
+        open(unit = 1120, file = filename, status = "unknown")
 
         rn = r0; tn = t0; Sn = 1._real_t; hn = h0
         call this%ifp_eqn_p%derivs(tn, rn, Sn, dSdtn)
@@ -73,15 +78,18 @@ contains
         idx = 2
 
         do ! something 
-            if (tn >= tf) exit 
+            if (tn >= tf .or. idx >= nmax) exit
             
             call this%ifp_eqn_p%derivs(tn, rn, Sn, dSdtn)
             call this%ifp_eqn_p%rkqs(rn, Sn, dSdtn, tn, hn, hdid, hnext)
+            !if (Sn <= eps / 10._real_t) exit ! tolerance reached
 
             hn = hnext
             rn = rn + this%ifp_eqn_p%dr(Sn, rn, tn)
             idx = idx + 1
             global_arr(1:5, idx) = [hn, tn, rn, Sn, dSdtn]
+            write (1120, *) idx, global_arr(1:5, idx), &
+                this%ifp_eqn_p%r_embryo(Sn, rn, tn)
         end do 
     end subroutine solver_sub
 

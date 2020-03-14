@@ -3,9 +3,6 @@ module runge_kutta_m
     implicit none 
     private
 
-    integer, public, parameter :: nmax = 10000 ! set the max
-    real(real_t), public :: global_arr(5, nmax) ! [h, t, r, S, dSdt]
-
     type, abstract, public :: runge_kutta_t 
         real(real_t) :: eps, yscal
     contains 

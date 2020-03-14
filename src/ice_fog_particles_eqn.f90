@@ -21,6 +21,7 @@ module ice_fog_particles_eqn_m
         procedure :: eqn_init => eqn_init_sub
         procedure :: temp => temp_func
         procedure :: dr => drdt_func
+        procedure :: r_embryo => I_func
         procedure :: derivs => derivs_sub
     end type ice_fog_particles_eqn_t
 
@@ -177,7 +178,7 @@ contains
         associate(f => this%f)
             do idx = 1, nmax
                 tn = global_arr(2, idx)
-                if (tn >= t) exit
+                if (tn >= t .or. tn == 0._real_t) exit
                 Sn = global_arr(3, idx)
                 rn = global_arr(4, idx)
 
