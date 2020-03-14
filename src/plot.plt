@@ -18,5 +18,6 @@ filename = 'fig2_1.txt'
 # set logscale xy
 plot filename using 3:5 with linespoints linestyle 1
 
+unset logscale x
 plot filename using 4:7 with linespoints linestyle 1
 
