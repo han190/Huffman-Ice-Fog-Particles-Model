@@ -68,7 +68,6 @@ contains
         r0 = 1.e-7_real_t
         h0 = 1.e-14_real_t
         global_arr = 0._real_t
-        ! output_arr = 0._real_t
 
         open(unit = 1120, file = filename, status = "unknown")
 
@@ -82,12 +81,13 @@ contains
             
             call this%ifp_eqn_p%derivs(tn, rn, Sn, dSdtn)
             call this%ifp_eqn_p%rkqs(rn, Sn, dSdtn, tn, hn, hdid, hnext)
-            !if (Sn <= eps / 10._real_t) exit ! tolerance reached
+            !if (Sn <= 1._real_t) exit ! tolerance reached
 
             hn = hnext
             rn = rn + this%ifp_eqn_p%dr(Sn, rn, tn)
             idx = idx + 1
             global_arr(1:5, idx) = [hn, tn, rn, Sn, dSdtn]
+            !print *, global_arr(1:5, idx - 1)
             write (1120, *) idx, global_arr(1:5, idx), &
                 this%ifp_eqn_p%r_embryo(Sn, rn, tn)
         end do 

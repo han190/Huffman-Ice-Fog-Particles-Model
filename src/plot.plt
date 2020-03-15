@@ -5,7 +5,7 @@ set terminal pdf enhanced font 'Cantarell Bold' \
 set key box linewidth 0.1
 set grid
 set style line 1 \
-    linetype 1 linewidth 1 \
+    linetype 1 linewidth .7 \
     pointtype 7 pointsize 0.01
 
 set output 'fig.pdf'
@@ -15,9 +15,9 @@ plot 'fig1_1.txt' using 1:2 with linespoints linestyle 1 lt rgb 'red', \
      'fig1_3.txt' using 1:2 with linespoints linestyle 1 lt rgb 'green'
 
 filename = 'fig2_1.txt'
-# set logscale xy
+unset logscale x
 plot filename using 3:5 with linespoints linestyle 1
 
-unset logscale x
+unset logscale xy
 plot filename using 4:7 with linespoints linestyle 1
 

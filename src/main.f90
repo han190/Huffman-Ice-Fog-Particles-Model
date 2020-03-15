@@ -6,7 +6,7 @@ program main
 
     ! Initializations
     real(real_t) :: v_0 = 0._real_t
-    real(real_t) :: a, b = 0._real_t
+    real(real_t) :: a = 0._real_t, b = 0._real_t
     real(real_t) :: T_i = 0._real_t
     real(real_t) :: T_0 = 0._real_t
     real(real_t) :: M = 0._real_t
@@ -80,21 +80,21 @@ program main
         real(real_t) :: tspan, arr(5, nmax)
         integer :: idx
 
-        a = 5e-4_real_t
-        b = 66.7_real_t
-        v_0 = 2000._real_t
-        T_i = 60._real_t + 273.16_real_t
-        T_0 = -40._real_t + 273.16_real_t
+        M   = 18._real_t !18._real_t ! g/mol
+        R   = 8.314e7_real_t !8.314e7_real_t ! erg/(K mol)
+        K   = 2.e3_real_t ! erg/(cm K)
+        D   = .242_real_t ! cm^2/s
+        f   = 5.e-4_real_t ! 5 micro-meter
+        e_i = .6_real_t!0._real_t !.5_real_t ! 0.6_real_t
+        e_w = 101._real_t!90._real_t !2._real_t ! 101._real_t
+        L_v = 44000.e7_real_t
+        L_s = 1e4_real_t
 
-        M = 18._real_t !18.01528_real_t ! g/mol
-        R = 8.314e5_real_t !8.314e7_real_t ! erg/(K mol)
-        K = 2.e5_real_t !0.02*1e5_real_t ! erg/(cm K)
-        D = .242_real_t !0.242_real_t ! cm^2/s
-        f = 5.e-4_real_t !5e-4_real_t ! 5 micro-meter
-        e_i = .6_real_t !0.6_real_t
-        e_w = 50._real_t !101._real_t
-        L_v = 500._real_t ! just a random number
-        L_s = 650._real_t ! just another random number
+        a   = 5e-4_real_t
+        b   = 66.7_real_t
+        v_0 = 2000._real_t
+        T_i = 60._real_t
+        T_0 = -40._real_t
 
         allocate(ifp_slv_p)
         call ifp_slv_p%init(v_0,a,b,T_i,T_0,M,K,D,R,f,e_i,e_w,L_v,L_s)
@@ -102,8 +102,3 @@ program main
     end block plot_figure_2
 
 end program main
-
-
-
-
-

@@ -9,4 +9,4 @@ gfortran -c main.f90
 gfortran -o ifp *.o
 ./ifp
 gnuplot plot.plt
-rm *.o *.mod *.txt
+# rm *.o *.mod *.txt
