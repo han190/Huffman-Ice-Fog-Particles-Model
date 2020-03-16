@@ -9,14 +9,11 @@ module ice_fog_particles_eqn_m
         real(real_t) :: a, b ! coefficients required to compute temp_abs
         real(real_t) :: T_i ! initial temperature
         real(real_t) :: T_0 ! environment temperature
-        !real(real_t) :: E ! the decrease in water vapor density, usually 0
         real(real_t) :: M ! the molecular weight of water
         real(real_t) :: K ! the thermal conductivity of air 
         real(real_t) :: D ! the diffusivity of water vapor in air
         real(real_t) :: R ! the gas constant
         real(real_t) :: f ! kinetics of vapor molecules and particle surface
-        ! Don't if I should treat the following as an input or a function
-        ! of time.
         real(real_t) :: e_i, e_w ! the saturation vapor pressure(ice and water)
         real(real_t) :: L_v, L_s ! the heats of vaporization and sublimation
     contains
@@ -88,7 +85,7 @@ contains
         real(real_t) :: e_w
         real(real_t), parameter :: e_s0 = 610.78_real_t ! Pascal
         real(real_t), parameter :: R_v = 461.5e4_real_t ! J/(kg K)
-        real(real_t), parameter :: constL = 2.501e10 ! J/kg
+        real(real_t), parameter :: constL = 2.501e10_real_t ! J/kg
 
         e_w = e_s0*exp(constL/R_v * (1._real_t/T_m - 1._real_t/temp))
         e_w = e_w*0.01_real_t
@@ -100,7 +97,7 @@ contains
         real(real_t) :: e_i
         real(real_t), parameter :: e_st = 611.20_real_t ! Pascal
         real(real_t), parameter :: R_v = 461.5e4_real_t ! J/(kg K)
-        real(real_t), parameter :: constL = 2.834e10 ! J/kg
+        real(real_t), parameter :: constL = 2.834e10_real_t ! J/kg
 
         e_i = e_st*exp(constL/R_v * (1._real_t/T_m - 1._real_t/temp))
         e_i = e_i*0.01_real_t
@@ -112,17 +109,6 @@ contains
         real(real_t) :: e_s, e_w, e_i, T_s, expt, temp
 
         temp = temp_func(this, t)
-        ! e_w = e_w_func(this, temp)
-        ! e_i = e_i_func(this, temp)
-
-        if (temp >= 0._real_t) then
-            T_s = 0._real_t
-        else if (temp < 0._real_t) then
-            T_s = temp
-        end if
-
-        expt = exp( - constA*r**3*t*(exp(T_s) - 1._real_t) )
-        e_s  = e_w + (e_i - e_w) * ( 1._real_t - expt )
         associate(e_w => this%e_w, e_i => this%e_i)
             if (temp >= 0._real_t) then
                 T_s = 0._real_t
@@ -145,7 +131,7 @@ contains
             if (temp >= 0._real_t) then
                 T_s = 0._real_t
             else if (temp < 0._real_t) then
-                T_s  = temp
+                T_s = temp
             end if
 
             expt = exp( - constA*r**3*t*(exp(T_s) - 1._real_t) )
