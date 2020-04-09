@@ -82,12 +82,12 @@ contains
         real(real_t), intent(in) :: t
         real(real_t) :: e_i, temp
         real(real_t), parameter :: &
-            C_1 = 8.91902223_real_t, &
-            C_2 = -6.973508_real_t, &
-            C_3 = -17.32425415_real_t
+            C_1 = 8.9498907_real_t, &
+            C_2 = -9.04755449_real_t, &
+            C_3 = -36.00978668_real_t
 
         temp = temp_func(this, t)
-        e_i = exp(C_1 + C_2*(T_m/temp - 1._real_t) + C_3*log(T_m/temp))
+        e_i = exp(C_1 + C_2*(T_m/temp - 1._real_t) + C_3*log10(T_m/temp))
     end function e_i_func
 
     function e_s_func(this, t) result(e_s)
