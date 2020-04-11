@@ -124,7 +124,7 @@ contains
         integer :: i
         real(dp), parameter :: ss0 = 1._dp
         real(dp), parameter :: ii0 = 0._dp
-        real(dp), parameter :: r0 = 1.e-2_dp
+        real(dp), parameter :: r0 = 0._dp
         real(dp), parameter :: t0 = 1.e-4_dp
         real(dp), parameter :: dt = 1.e-6_dp
 
