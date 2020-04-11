@@ -3,8 +3,9 @@ module ice_fog_particles_m
     implicit none
     private
 
-    ! C.G.ss. system is used.
+    ! use C.G.S. system
     ! use double letter to represent upper case
+    ! use undrescore to represent subscript
     ! ignore division sign, for example: dr/dr => drdt
 
     type, public :: ice_fog_particles_t
