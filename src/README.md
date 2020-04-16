@@ -1,15 +1,25 @@
-A SIMPLE ICE FOG PARTICLES MODEL REBUILT FROM [HUFFMAN, 1957]
+# A SIMPLE ICE FOG PARTICLES MODEL REBUILT FROM [HUFFMAN, 1957]
+
+## Structure
 
 This program contains five files, four fortran files and a gnuplot file:
 
-1.  real.f90 -- defines necessary real types and constants for the code
-2.  ice_particles.f90 -- equations and functions required for the ODE
-3.  ice_particles_solver.f90 -- the main solver
-4.  main.f90 -- the main program that generates all the outputs
-5.  plot.plt -- the plotting script
+1.  real.f90                    -- type and constant module
+2.  ice_particles_eqn.f90       -- equation module
+3.  ice_particles_solver.f90    -- solver module
+4.  main.f90                    -- main program
+5.  plot.plt                    -- plotting program
+
+## Math
 
 The main equation we are solving here is:
-    dS/dt =  - L * M * S / (R * T^2) * dT/dt  - R * T / (e_s * M) * Sum(dm/dt)
+
+```tex
+\frac{dS}{dt}
+```
+
+$dS/dt =  - L * M * S / (R * T^2) * dT/dt  - R * T / (e_s * M) * Sum(dm/dt)$
+
 and the main idea to solve the equation is, for each time step i, assume the
 time at step i is t_i, we have 
 
