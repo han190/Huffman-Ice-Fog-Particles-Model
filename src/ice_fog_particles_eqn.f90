@@ -1,4 +1,4 @@
-module ice_fog_particles_m
+module ice_fog_particles_eqn_m
     use real_m
     implicit none
     private
@@ -22,7 +22,7 @@ module ice_fog_particles_m
         procedure :: u => u_func
         procedure :: v => v_func
         procedure :: ii => ii_func
-        procedure :: drdt => drdt_func
+        procedure :: r => r_func
     end type ice_fog_particles_t
 
     real(dp), public, parameter :: pi = 3.1415926535897932384626_dp !sure...
@@ -137,6 +137,7 @@ contains
 
         temp = temp_func(this, t)
         sigma = -0.1575_dp*(temp - 220._dp) + 83.9_dp
+        sigma = sigma*.9
     end function sigma_func
 
     function dd_func(this, t) result(d) ! Emperical
@@ -190,15 +191,14 @@ contains
         ii = term_1 * term_2 * expt
     end function ii_func
 
-    function drdt_func(this, ss, r, t) result(drdt)
-        class(ice_fog_particles_t) :: this 
-        real(dp), intent(in) :: ss, r, t
-        real(dp) :: drdt, u, v
-        real(dp), parameter :: rho = .997_dp
+    function r_func(this, t, ss) result(r)
+        class(ice_fog_particles_t) :: this
+        real(dp), intent(in) :: t, ss
+        real(dp) :: r, u, v
 
         u = u_func(this, t)
         v = v_func(this, t)
-        drdt = (ss - 1._dp) / ((u + v) * rho * r)
-    end function drdt_func 
+        r = 2._dp * t * (ss - 1._dp) / (u + v)
+    end function r_func
 
-end module ice_fog_particles_m
+end module ice_fog_particles_eqn_m

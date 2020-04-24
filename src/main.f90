@@ -1,6 +1,6 @@
 program main
     use real_m
-    use ice_fog_particles_m
+    use ice_fog_particles_eqn_m
     use ice_fog_particles_solver_m
     implicit none 
 
@@ -14,7 +14,7 @@ program main
         b = 66.7_dp
         v_0 = 2000._dp
         tt_i = 60._dp
-        tt_0 = -40._dp
+        tt_0 = -44._dp
 
         allocate(ifp)
         call ifp%eqn_init(v_0, a, b, tt_i, tt_0, f)
@@ -118,30 +118,28 @@ program main
         deallocate(ifp)
     end block plot_uv
 
-    ! solve_s: block 
-    !     type(ice_fog_particles_solver_t), pointer :: ifps
-    !     integer :: i 
+    solve_s: block
+        type(ice_fog_particles_solver_t), pointer :: ifps
+        real(dp), allocatable :: time(:), saturation_ratio(:)
+        integer :: i
 
-    !     a = 5e-4_dp
-    !     b = 66.7_dp
-    !     v_0 = 2000._dp
-    !     tt_i = 60._dp
-    !     tt_0 = -40._dp
-    !     f = 5e-4_dp
+        a = 5e-4_dp
+        b = 66.7_dp
+        v_0 = 2000._dp
+        tt_i = 60._dp
+        tt_0 = -44._dp
+        f = 1.e-10_dp
 
-    !     allocate(ifps)
-    !     call ifps%init(v_0, a, b, tt_i, tt_0, f)
-    !     call ifps%slv()
+        allocate(ifps)
+        call ifps%init(v_0, a, b, tt_i, tt_0, f)
+        call ifps%slv(time, saturation_ratio)
 
-    !     open(unit = 7, file = "fig7_1.txt", status = "unknown")
-    !     print *, nmax
-    !     print *, 'size = ', size(t_arr)
-    !     write (7, *) "t", "r", "drdt", "S", "dSdt", "I"
-    !     do i = 1, nmax
-    !         write (7, *) t_arr(i), r_arr(i), drdt_arr(i), &
-    !             ss_arr(i), dssdt_arr(i), ii_arr(i)
-    !     end do 
-    !     deallocate(ifps)
-    ! end block solve_s
+        open(unit = 7, file = "fig7_1.txt", status = "unknown")
+        write (7, *)
+        do i = 1, size(time)
+            write (7, *) time(i), saturation_ratio(i)
+        end do
+        deallocate(ifps)
+    end block solve_s
         
 end program main 
