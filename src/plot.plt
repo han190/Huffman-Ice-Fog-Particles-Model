@@ -80,13 +80,17 @@ set logscale y
 plot 'fig4_1.txt' using 1:2 with lines lw 1 dt 1 lt 8, \
     'fig4_1.txt' using 1:3 with lines lw 1 dt 1 lt 8
 
-set output "fig7.pdf"
-set terminal pdf enhanced font 'Cantarell Bold' fontscale 0.2 size 2.0, 1.5
+set output "fig5_2.pdf"
+set terminal pdf enhanced font 'Cantarell Bold' fontscale 0.2 size 2.5, 1.5
 set logscale x 10
 set logscale y 10
-set xrange [0.0001:1]
+set xrange [0.0001:100]
+# set xrange [0.01:1]
 set yrange [1:10]
+set xlabel "TIME ( SECONDS )"
+set ylabel "SATURATION RATIO"
 set xtics ("10^{-4}" 0.0001, "10^{-3}" 0.001, "10^{-2}" 0.01, "10^{-1}" 0.1, "10^0" 1)
 set ytics ("1" 1, "2" 2, "3" 3, "4" 4, "5" 5, "6" 6, \
     "7" 7, "8" 8, "9" 9, "10" 10)
-plot 'fig7_1.txt' using 1:2 with lines lw 1 dt 1 lt 8
+plot 'fig5_2.txt' using 1:2 with lines lw 1.2 dt 5 lt 8
+#    'fig5_2.txt' using 1:2 with lines lw 1.2 dt 1 lt 8

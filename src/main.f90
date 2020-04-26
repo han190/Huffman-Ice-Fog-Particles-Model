@@ -128,18 +128,51 @@ program main
         v_0 = 2000._dp
         tt_i = 60._dp
         tt_0 = -44._dp
-        f = 1.e-10_dp
+        f = 1.e-30_dp
 
         allocate(ifps)
         call ifps%init(v_0, a, b, tt_i, tt_0, f)
         call ifps%slv(time, saturation_ratio)
 
-        open(unit = 7, file = "fig7_1.txt", status = "unknown")
+        open(unit = 7, file = "fig5_1.txt", status = "unknown")
         write (7, *)
         do i = 1, size(time)
             write (7, *) time(i), saturation_ratio(i)
         end do
         deallocate(ifps)
+
+        a = 2e-4_dp
+        b = 667._dp
+        v_0 = 200._dp
+        tt_i = 30._dp
+
+        allocate(ifps)
+        call ifps%init(v_0, a, b, tt_i, tt_0, f)
+        call ifps%slv(time, saturation_ratio)
+
+        open(unit = 8, file = "fig5_2.txt", status = "unknown")
+        write (8, *)
+        do i = 1, size(time)
+            write (8, *) time(i), saturation_ratio(i)
+        end do
+        deallocate(ifps)
+
+        a = 5e-4_dp
+        b = 6670._dp
+        v_0 = 20._dp
+        tt_i = 0._dp
+
+        allocate(ifps)
+        call ifps%init(v_0, a, b, tt_i, tt_0, f)
+        call ifps%slv(time, saturation_ratio)
+
+        open(unit = 9, file = "fig5_3.txt", status = "unknown")
+        write (9, *)
+        do i = 1, size(time)
+            write (9, *) time(i), saturation_ratio(i)
+        end do
+        deallocate(ifps)
+
     end block solve_s
         
 end program main 

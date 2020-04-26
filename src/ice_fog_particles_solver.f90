@@ -31,6 +31,25 @@ contains
         this%f = f
     end subroutine solver_init_sub
 
+    function dt_func(t) result(dt)
+        real(dp), intent(in) :: t
+        real(dp) :: dt
+
+        if (t >= 1.e-6_dp .and. t < 1.e-3_dp) then
+            dt = 1.e-5_dp
+        else if (t >= 1.e-3_dp .and. t < 1.e-2_dp) then
+            dt = 1.e-4_dp
+        else if (t >= 1.e-2_dp .and. t < 1.e-1_dp) then
+            dt = 1.e-3_dp
+        else if (t >= 1.e-1_dp .and. t < 1._dp) then
+            dt = 1.e-2_dp
+        else if (t >= 1._dp .and. t < 10._dp) then
+            dt = 1.e-1_dp
+        else
+            dt = 1._dp
+        end if
+    end function dt_func
+
     subroutine solve_sub(this, time, saturation_ratio)
         class(ice_fog_particles_solver_t) :: this
         real(dp), allocatable, intent(out) :: time(:), saturation_ratio(:)
@@ -39,7 +58,6 @@ contains
         real(dp), parameter :: ii0 = 0._dp
         real(dp), parameter :: r0 = 0._dp
         real(dp), parameter :: t0 = 1.e-4_dp
-        real(dp), parameter :: factor = 1.0_dp
 
         integer, parameter :: nmax = 100000
         real(dp), dimension(nmax) :: t_arr, ss_arr, integrand_arr
@@ -51,7 +69,7 @@ contains
         integer :: i
 
         ! Initialization
-        dt              = 1.e-7_dp
+        dt              = 1.e-5_dp
         t_arr           = 0._dp
         ss_arr          = 0._dp
         integrand_arr   = 0._dp
@@ -64,7 +82,7 @@ contains
         i = 1
         ss_min = 10._dp
         do
-            if (i >= nmax) exit
+            if (i >= nmax .or. t >= 9.9) exit
 
             ! step i
             if (i /= 1) then
@@ -85,11 +103,11 @@ contains
             sum_dmdt    = 4._dp * pi * (ss - 1._dp) / (u + v) * integral
             dssdt       = - term_one - term_two * sum_dmdt
 
-            if (dssdt < 0._dp) then 
-                if (ss_min >= ss) then 
+            if (dssdt < 0._dp) then
+                if (ss_min >= ss) then
                     ss_min = ss
                 else
-                    exit 
+                    exit
                 end if
             end if
 
@@ -102,7 +120,7 @@ contains
             i   = i + 1
             ss  = ss + dssdt*dt
             t   = t + dt
-            dt  = dt*factor
+            dt  = dt_func(t)
         end do
 
         allocate(time(i), saturation_ratio(i))
