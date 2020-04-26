@@ -33,4 +33,4 @@ to remove all files generated.
 
 ## Try some math
 
-<p align="center"><img src="https://rawgit.com/han190/Huffman-Ice-Fog-Particles-Model/master/svgs/32737e0a8d5a4cf32ba3ab1b74902ab7.svg?invert_in_darkmode" align=middle width=127.9847844pt height=39.452455349999994pt/></p>
+<p align="center"><img src="https://rawgit.com/han190/Huffman-Ice-Fog-Particles-Model/master/svgs/2d1c21a234ec5123ecbbd3299ba135fe.svg?invert_in_darkmode" align=middle width=100.39196969999999pt height=41.93123385pt/></p>
