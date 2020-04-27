@@ -31,6 +31,6 @@ and use
 ```
 to remove all files generated.
 
-## Try some math
+## Some output figures
 
-<p align="center"><img src="https://rawgit.com/han190/Huffman-Ice-Fog-Particles-Model/master/svgs/2d1c21a234ec5123ecbbd3299ba135fe.svg?invert_in_darkmode" align=middle width=100.39196969999999pt height=41.93123385pt/></p>
+![](images/fig1.png)

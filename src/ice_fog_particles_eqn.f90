@@ -137,7 +137,6 @@ contains
 
         temp = temp_func(this, t)
         sigma = -0.1575_dp*(temp - 220._dp) + 83.9_dp
-        sigma = sigma*.9
     end function sigma_func
 
     function dd_func(this, t) result(d) ! Emperical
