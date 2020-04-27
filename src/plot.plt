@@ -1,7 +1,7 @@
 #! /usr/bin/env gnuplot
 
 set encoding utf8
-set tics font "Cantarell Bold, 14"
+set tics font "Cantarell Bold, 50"
 unset key
 # set key box linewidth 0.1 width -4
 # set grid
@@ -11,11 +11,12 @@ unset key
 
 set output 'fig1.png'
 set terminal png transparent \
-    font 'Cantarell Bold' 14 \
-    size 1100, 800 \
+    font 'Cantarell Bold' 50 \
+    size 3840, 2160 \
     enhanced
+set size 1.0, 0.99
 
-set border linewidth 3.5
+set border linewidth 10
 
 set xrange [0.0001:100]
 set yrange [-50:70]
@@ -30,12 +31,13 @@ set logscale x
 set label "A" at 0.001, 55
 set label "B" at 0.001, 33
 set label "C" at 0.001, 3
-set label "T = T_0 + ( T_i - T_0 ) / [ a b ( T_i - T_0 ) ln ( c t + 1 ) + 1 ]" at 0.1, 55
-set label "T_i = INITIAL TEMP." at 0.1, 50
-set label "T_0 = AMBIENT TEMP." at 0.1, 45.8
-plot 'fig1_1.txt' using 1:2 with lines linewidth 3 dt 1 lt 8, \
-    'fig1_2.txt' using 1:2 with lines linewidth 3 dt 1 lt 8, \
-    'fig1_3.txt' using 1:2 with lines linewidth 3 dt 1 lt 8
+set label "T = T_0 + ( T_i - T_0 ) / [a b ( T_i - T_0 ) ln ( c t + 1 ) + 1]" \
+    at 0.1, 55
+set label "T_i = INITIAL TEMP." at 0.1, 48
+set label "T_0 = AMBIENT TEMP." at 0.1, 41
+plot 'fig1_1.txt' using 1:2 with lines linewidth 7 dt 1 lt 8, \
+    'fig1_2.txt' using 1:2 with lines linewidth 7 dt 1 lt 8, \
+    'fig1_3.txt' using 1:2 with lines linewidth 7 dt 1 lt 8
 
 set output 'fig2.png'
 set terminal png transparent \
