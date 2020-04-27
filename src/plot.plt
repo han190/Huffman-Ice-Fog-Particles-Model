@@ -12,7 +12,7 @@ unset key
 set output 'fig1.png'
 set terminal png transparent \
     font 'Cantarell Bold' 14 \
-    size 1100, 660 \
+    size 1100, 800 \
     enhanced
 
 set border linewidth 3.5
