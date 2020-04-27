@@ -14,7 +14,7 @@ set terminal png transparent \
     font 'Cantarell Bold' 50 \
     size 3840, 2160 \
     enhanced
-set size 1.0, 0.99
+set size 1.0, 0.8
 
 set border linewidth 10
 
@@ -22,7 +22,11 @@ set xrange [0.0001:100]
 set yrange [-50:70]
 
 set ylabel "TEMP. ( DEG. C )"
-set xlabel "TIME ( SECOND ) \n \n Curve A: a = 5 x 10^{-4} cm^{-1} deg^{-1}, b = 66.7 cm^{-1}, v_0 = 2000 cm sec^{-1} ; \n Curve B: a = 2 x 10^{-4} cm^{-1} deg^{-1}, b = 667 cm^{-1}, v_0 = 200 cm sec^{-1} ; \n Curve C: a = 5 x 10^{-4} cm^{-1} deg^{-1}, b = 6670 cm^{-1}, v_0 = 20 cm sec^{-1} . "
+set xlabel "TIME ( SECOND )"
+
+set label "Curve A: a = 5 x 10^{-4} cm^{-1} deg^{-1}, b = 66.7 cm^{-1}, v_0 = 2000 cm sec^{-1} ;" at 0.001, 100
+set label "Curve B: a = 2 x 10^{-4} cm^{-1} deg^{-1}, b = 667 cm^{-1}, v_0 = 200 cm sec^{-1} ;" at 0.001, 90
+set label "Curve C: a = 5 x 10^{-4} cm^{-1} deg^{-1}, b = 6670 cm^{-1}, v_0 = 20 cm sec^{-1} . " at 0.001, 80
 
 set xtics ("10^{-4}" 0.0001, "10^{-3}" 0.001, \
     "10^{-2}" 0.01, "10^{-1}" 0.1, "1" 1, "10^1" 10, "10^2" 100)
