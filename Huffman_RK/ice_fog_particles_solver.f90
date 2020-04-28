@@ -11,10 +11,11 @@ module ice_fog_particles_solver_m
     contains
         procedure :: solver_init => initialize_sub
         procedure :: solver_slv => solver_sub
+        procedure :: solver_plt_temp => plot_temperature_sub
     end type ice_fog_particles_solver_t
 
     integer, parameter :: neq = 1
-    integer, parameter :: nmax = 10000000 ! ten million points
+    integer, parameter :: nmax = 20000000 ! ten million points
     real(real_t), dimension(neq), parameter :: yscal = 1._real_t
     real(real_t), parameter :: eps = 1.e-16_real_t 
 
@@ -45,7 +46,7 @@ contains
         integer :: i 
         ! initial values
         real(real_t), parameter :: ss0 = 1._real_t, ii0 = 0._real_t
-        real(real_t), parameter :: r0 = 0._real_t, t0 = 1.e-4_real_t
+        real(real_t), parameter :: r0 = 0._real_t, t0 = 1.e-5_real_t
 
         t = t0
         ss = ss0
@@ -53,7 +54,6 @@ contains
         ss_max = 0._real_t
         
         open(unit = 1, file = filename, status = "unknown")
-        ! write (1, *) t0, ss0
         
         i = 2
         main_loop: do
@@ -76,6 +76,22 @@ contains
             i = i + 1
         end do main_loop
     end subroutine solver_sub
+
+    subroutine plot_temperature_sub(this, filename)
+        class(ice_fog_particles_solver_t) :: this
+        character(len=*), intent(in) :: filename
+        real(real_t) :: t
+
+        open(unit = 1, file = filename, status = "unknown")
+        t = 1.e-4_real_t
+
+        do
+            if (t >= 1.1e2_real_t) exit 
+            write (1, *) t, this%ice_fog_particles_p%tt(t) - tt_m
+            t = t * 1.05_real_t
+        end do
+    end subroutine plot_temperature_sub
+
 
 end module ice_fog_particles_solver_m
 

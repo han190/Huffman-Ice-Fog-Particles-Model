@@ -26,7 +26,6 @@ module ice_fog_particles_eqn_m
     real(real_t), public, parameter :: rr = 8.31446261815324e7_real_t !check
     real(real_t), public, parameter :: mm = 18.01528_real_t !check
     real(real_t), public, parameter :: kk = 2.09e3_real_t
-    real(real_t), public, parameter :: dd0 = 0.106144_real_t
 
 contains
 
@@ -132,16 +131,18 @@ contains
 
         temp = temp_func(this, t)
         sigma = -0.1575_real_t*(temp - 220._real_t) + 83.9_real_t
-        sigma = sigma*.9
     end function sigma_func
 
     function dd_func(this, t) result(d) ! Emperical
         class(ice_fog_particles_t) :: this
         real(real_t), intent(in) :: t
         real(real_t) :: d, temp
+        real(real_t), parameter :: dd0 = 0.0106144_real_t
+        real(real_t) :: emperical_const
 
         temp = temp_func(this, t)
-        d = dd0*exp(0.007_real_t*(temp - 230._real_t))
+        emperical_const = (this%tt_0 + this%tt_i) + tt_m
+        d = dd0*exp(-1._real_t*(temp - emperical_const))
     end function dd_func
 
     function v_func(this, t) result(v)
@@ -189,11 +190,17 @@ contains
     function r_func(this, t, ss) result(r)
         class(ice_fog_particles_t) :: this
         real(real_t), intent(in) :: t, ss
-        real(real_t) :: r, u, v
+        real(real_t) :: r, r2, u, v
 
         u = u_func(this, t)
         v = v_func(this, t)
-        r = 2._real_t * t * (ss - 1._real_t) / (u + v)
+        r2 = 2._real_t * t * (ss - 1._real_t) / (u + v)
+        
+        if (r2 > 0._real_t) then 
+            r = sqrt(r2)
+        else
+            r = 0._real_t
+        end if
     end function r_func
 
     subroutine integrate(initial_condition, integrand, integral)
@@ -221,7 +228,7 @@ contains
         real(real_t) :: term_one, term_two, sum_dmdt
         logical :: initial_condition
 
-        initial_condition = x == 1.e-4_real_t .and. y(1) == 1._real_t
+        initial_condition = x <= 1.e-5_real_t .and. y(1) == 1._real_t
 
         tt    = temp_func(this, x)
         dttdt = dtemp_func(this, x)
