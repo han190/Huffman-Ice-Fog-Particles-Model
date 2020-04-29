@@ -22,9 +22,9 @@ set xtics (" " 0.0001, " " 0.0002, " " 0.0003, " " 0.0004, \
 set ytics ("1" 1, "2" 2, "3" 3, "4" 4, "5" 5, "6" 6, \
     "7" 7, "8" 8, "9" 9, "10" 10)
     
-# set label "B" at 0.0002, 1.4
-# set label "A" at 0.0003, 1.2
-# set label "C" at 0.0001, 1.7
+set label "C" at 0.003, 7.0
+set label "B" at 0.002, 3.1
+set label "A" at 0.003, 2.8
 set label "A:10^{-4}" at 0.0001, 11 left
 set label "10^{-3}" at 0.001, 11 center
 set label "10^{-2}" at 0.01, 11 center

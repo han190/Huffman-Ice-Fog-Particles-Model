@@ -20,14 +20,14 @@ sudo brew install gfortran gnuplot
 then you are good to go!
 
 ## Compile
-To compile and run
+To compile and run, go to `src` and type
 ```shell
-./wrapper
+./ice_fog_particles.sh
 ```
 
 and use
 ```shell
-./wipper
+./clean.sh
 ```
 to remove all files generated.
 
