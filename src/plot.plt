@@ -3,8 +3,7 @@
 set encoding utf8
 unset key
 set output "saturation.png"
-set terminal png transparent \
-    font 'Cantarell Bold' 50 \
+set terminal png font 'Cantarell Bold' 50 \
     size 3840, 2160 \
     enhanced
 set size 1.0, 0.85
@@ -50,8 +49,7 @@ reset
 set encoding utf8
 unset key
 set output 'temperature.png'
-set terminal png transparent \
-    font 'Cantarell Bold' 50 \
+set terminal png font 'Cantarell Bold' 50 \
     size 3840, 2160 \
     enhanced
 set size 1.0, 0.8
